@@ -12,11 +12,13 @@ div>div{background-color:white}
 <div style="background-color:yellow"><div contenteditable></div></div><br>
 <div style="background-color:green"><div contenteditable></div></div><br>
 <div style="background-color:indigo"><div contenteditable></div></div><br>
+<div style="background-color:grey"><div contenteditable></div></div><br>
 <div style="background-color:black"><div contenteditable></div></div><br>
 <button>Reset</button>
 </center>
 <script>
 document.getElementsByTagName('button')[0].addEventListener('click',e=>{
-  [...document.getElementsByTagName('div')].map(e=>{if(e.isContentEditable)e.textContent=''});
+  let chk=confirm('Reset colors?');
+  if(chk){[...document.getElementsByTagName('div')].map(e=>{if(e.isContentEditable)e.textContent=''})};
 });
 </script>
