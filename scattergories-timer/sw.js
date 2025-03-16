@@ -10,9 +10,12 @@ self.addEventListener('activate', function (event) {
 	);
 });
 
-// self.addEventListener('message', async (event) => {
-// 	if (event.data.type !== 'notification')
-// 		return;
-// 	console.log(event.data);
-// 	self.registration.showNotification(event.data.notificationData.title, event.data.notificationData.options);
-// });
+self.addEventListener('message', async (event) => {
+	if (event.data.type !== 'notification')
+		return;
+	self.registration.showNotification(event.data.notificationData.title, event.data.notificationData.options);
+});
+
+self.addEventListener('notificationclick', (event) => {
+	event?.notification?.close();
+});

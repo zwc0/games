@@ -104,16 +104,19 @@ function startTimer(){
 				const notificationData = {
 					title: 'Stop!',
 					options: {
-						body: `scattergories-timer-${endTime}`,
 						tag: `scattergories-timer-${endTime}`,
 					},
 				};
 				//Trigger notification via service worker as android currently only supports the API via SW.
+				//	This also HAS to be from the SW. Using the calling servicWorker...showNotification() doesn't work.
 				//Tag in this case doesn't prevent duplicate alerts for some reason.
 				//Only call second notification if service worker attempt fails.
-				const swNotification = navigator?.serviceWorker?.registration?.showNotification?.(notificationData.title, notificationData.options);
-				if (!swNotification)
-					new Notification(notificationData.title, notificationData.options);
+				const swController = navigator?.serviceWorker?.controller;
+				if (swController)
+					swController.postMessage({type: 'notification', notificationData});
+				else
+					new Notification(notificationData.title, notificationData.options)
+						.addEventListener('click', e=>e?.target?.close());;
 			}
 			return;
 		}
