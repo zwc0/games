@@ -100,8 +100,21 @@ function startTimer(){
 		if (diff <= 0) {
 			divtimer.textContent ='0:00';
 			stop();
-			if (checkNotificationPermissions().success)
-				new Notification('Stop!');
+			if (checkNotificationPermissions().success){
+				const notificationData = {
+					title: 'Stop!',
+					options: {
+						body: `scattergories-timer-${endTime}`,
+						tag: `scattergories-timer-${endTime}`,
+					},
+				};
+				//Trigger notification via service worker as android currently only supports the API via SW.
+				//Tag in this case doesn't prevent duplicate alerts for some reason.
+				//Only call second notification if service worker attempt fails.
+				const swNotification = navigator?.serviceWorker?.registration?.showNotification?.(notificationData.title, notificationData.options);
+				if (!swNotification)
+					new Notification(notificationData.title, notificationData.options);
+			}
 			return;
 		}
 		const diffSeconds = Math.ceil(diff / 1000);
