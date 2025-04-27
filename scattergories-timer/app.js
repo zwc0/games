@@ -86,7 +86,7 @@ const duration = () =>
 	1000 * 60 * document.getElementById('configTimerMinutes').value
 	+ 1000 * document.getElementById('configTimerSeconds').value;
 
-	function startTimer(){
+function startTimer(){
 	const endTime = +new Date() + duration();
 	const abortController = new AbortController();
 	abortController.signal.addEventListener('abort', () => {
