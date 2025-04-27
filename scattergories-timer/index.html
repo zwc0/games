@@ -4,7 +4,7 @@
 		<title>Scattergories Timer</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<script type="module" src="./app.js"></script>
-		<script>
+		<script type="module">
 			if('serviceWorker' in navigator){
 				navigator.serviceWorker.register('sw.js');
 			}
@@ -28,6 +28,21 @@
 		<div>
 			<button type="button" id="start">Start</button>
 			<button type="button" id="stop" disabled>Stop</button>
+			<button type="button" id="btnConfig">Config</button>
 		</div>
+		<dialog id="dialogConfig">
+			<form method="dialog">
+				<div>Config</div>
+				<div>
+					<input type="number" value="3" id="configTimerMinutes" autofocus />m
+					<input type="number" value="00" id="configTimerSeconds" />m
+				</div>
+				<div style="margin-top: .5rem;">
+					<button formmethod="dialog">
+						Save
+					</button>
+				</div>
+			</form>
+		</dialog>
 	</body>
 </html>

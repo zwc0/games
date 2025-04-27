@@ -4,6 +4,7 @@ const divLetter = document.getElementById('letter');
 const divtimer = document.getElementById('timer');
 const btnStart = document.getElementById('start');
 const btnStop = document.getElementById('stop');
+const btnConfig = document.getElementById('btnConfig');
 // #endregion DOM Element Targets
 
 /**
@@ -81,9 +82,12 @@ function generateRandomLetter(){
 	return letters[rn];
 }
 
-const duration = 1000 * 60 * 3;
-function startTimer(){
-	const endTime = +new Date() + duration;
+const duration = () =>
+	1000 * 60 * document.getElementById('configTimerMinutes').value
+	+ 1000 * document.getElementById('configTimerSeconds').value;
+
+	function startTimer(){
+	const endTime = +new Date() + duration();
 	const abortController = new AbortController();
 	abortController.signal.addEventListener('abort', () => {
 		clearInterval(interval);
@@ -149,3 +153,7 @@ async function init(){
 }
 
 init();
+
+btnConfig.addEventListener('click', () => {
+	document.getElementById('dialogConfig').showModal();
+});
