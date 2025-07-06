@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Scattergories Timer</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script type="module" src="./js/app.js?v=1.0.0"></script>
+		<script type="module">
+			if('serviceWorker' in navigator){
+				navigator.serviceWorker.register('sw.js');
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Main</h1>
+		<div id="errors"></div>
+		<div>
+			<button type="button" id="start">Start</button>
+			<button type="button" id="stop" disabled>Stop</button>
+			<button type="button" id="btnConfig">Config</button>
+		</div>
+		<main id="root"></main>
+	</body>
+</html>
