@@ -63,14 +63,26 @@ async function requestNotificationPermissions(){
 	};
 }
 
+async function displayNotification(notificationData){
+	if (!checkNotificationPermissions().success)
+		return;
+	//Trigger notification via service worker as android currently only supports the API via SW.
+	//	This also HAS to be from the SW. Using the calling servicWorker...showNotification() doesn't work.
+	//Tag in this case doesn't prevent duplicate alerts for some reason.
+	//Only call second notification if service worker attempt fails.
+	const swController = navigator?.serviceWorker?.controller;
+	if (swController)
+		swController.postMessage({type: 'notification', notificationData});
+	else
+		new Notification(notificationData.title, notificationData.options)
+			.addEventListener('click', e=>e?.target?.close());;
+}
+
 // #endregion Notifications
 
 const imports = [
 	'./modules/random-letter.js',
-	'./modules/random-letter.js',
-	'./modules/random-letter.js',
-	'./modules/random-letter.js',
-	// './js/modules/countdown.js',
+	'./modules/countdown.js',
 ];
 
 const initializedModules = new Set();
@@ -90,7 +102,9 @@ async function init(){
 		root.appendChild(container);
 		import(src)
 			.then(module => {
-				const m = module.default({container});
+				const m = module.default({container, actions: {
+					displayNotification
+				}});
 				initializedModules.add(m);
 			})
 			.catch(err => console.error('src: ', src, err));

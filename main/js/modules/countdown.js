@@ -1,53 +1,29 @@
-
-/**
- * 
- * @param {HTMLElement} el 
- * @param {boolean} enabled 
- */
-function enableBtn(el, enabled = true){
-	el.disabled = !enabled;
-}
+import '../types/index.js';
 
 const duration = () =>
-	1000 * 60 * document.getElementById('configTimerMinutes').value
-	+ 1000 * document.getElementById('configTimerSeconds').value;
+	1000 * 60 * 0
+	+ 1000 * 5;
 
-function startTimer(){
+function startTimer({divtimer, displayNotification}){
 	const endTime = +new Date() + duration();
 	const abortController = new AbortController();
 	abortController.signal.addEventListener('abort', () => {
 		clearInterval(interval);
-		enableBtn(btnStart);
-		enableBtn(btnStop, false);
 	});
 
 	const stop = () => abortController.abort();
-
-	enableBtn(btnStart, false);
 
 	function checkTime(){
 		const diff = endTime - new Date();
 		if (diff <= 0) {
 			divtimer.textContent ='0:00';
 			stop();
-			if (checkNotificationPermissions().success){
-				const notificationData = {
-					title: 'Stop!',
-					options: {
-						tag: `scattergories-timer-${endTime}`,
-					},
-				};
-				//Trigger notification via service worker as android currently only supports the API via SW.
-				//	This also HAS to be from the SW. Using the calling servicWorker...showNotification() doesn't work.
-				//Tag in this case doesn't prevent duplicate alerts for some reason.
-				//Only call second notification if service worker attempt fails.
-				const swController = navigator?.serviceWorker?.controller;
-				if (swController)
-					swController.postMessage({type: 'notification', notificationData});
-				else
-					new Notification(notificationData.title, notificationData.options)
-						.addEventListener('click', e=>e?.target?.close());;
-			}
+			displayNotification({
+				title: 'Stop!',
+				options: {
+					tag: `scattergories-timer-${endTime}`,
+				},
+			});
 			return;
 		}
 		const diffSeconds = Math.ceil(diff / 1000);
@@ -58,10 +34,32 @@ function startTimer(){
 	const interval = setInterval(checkTime, 250);
 	checkTime();
 
-	enableBtn(btnStop);
-	btnStop.addEventListener('click', ()=>{
-		stop();
-	}, {
-		signal: abortController.signal,
-	});
+	return {abortController};
 }
+
+/**
+ * @param {ModuleConstructor} params
+ * @returns {ModuleReturn}
+ */
+export default (params) => {
+	params.container.innerHTML = `<div>
+			Time remaining:
+			<br />
+			<span data-id="timer">0:00</span>
+		</div>`;
+	const elTimer = params.container.querySelector('[data-id="timer"]');
+	let abortController;
+
+	return {
+		start: () => {
+			abortController?.abort();
+			const res = startTimer({
+				divtimer: elTimer, displayNotification: params.actions.displayNotification
+			});
+			abortController = res.abortController;
+		},
+		dispose: () => {
+			//cleanup event listeners	
+		},
+	};
+};
