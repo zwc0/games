@@ -3,6 +3,7 @@ const divErrors = document.getElementById('errors');
 const btnStart = document.getElementById('start');
 const btnStop = document.getElementById('stop');
 const btnConfig = document.getElementById('btnConfig');
+const textareaModules = document.getElementById('modules');
 const root = document.getElementById('root');
 // #endregion DOM Element Targets
 
@@ -80,10 +81,19 @@ async function displayNotification(notificationData){
 
 // #endregion Notifications
 
-const imports = [
-	'./modules/random-letter.js',
-	'./modules/countdown.js',
-];
+const importPresets = {
+	'Scattergories': [
+		'./modules/random-letter.js',
+		'./modules/countdown.js',
+	],
+};
+
+let imports = importPresets['Scattergories'];
+textareaModules.value = imports.join('\n');
+textareaModules.addEventListener('change', () => {
+	imports = textareaModules.value.split('\n').map(x=>x?.trim?.()).filter(x=>x);
+	initImports();
+});
 
 const initializedModules = new Set();
 
@@ -91,11 +101,18 @@ btnStart.addEventListener('click', () => {
 	initializedModules.forEach(x=>x.start());
 });
 
-async function init(){
-	const notificationCheck = await requestNotificationPermissions();
-	if (!notificationCheck.success){
-		divErrors.textContent = notificationCheck.errorMsg;
-	}
+async function initImports(){
+	initializedModules.forEach(async x=>{
+		try{
+			await x?.dispose?.();
+		}catch(e){
+			console.error(e);
+		}finally{
+			initializedModules.delete(x);
+		}
+	});
+
+	root.innerHTML = '';
 
 	imports.forEach((src)=>{
 		const container = document.createElement('div');
@@ -109,6 +126,15 @@ async function init(){
 			})
 			.catch(err => console.error('src: ', src, err));
 	});
+}
+
+async function init(){
+	const notificationCheck = await requestNotificationPermissions();
+	if (!notificationCheck.success){
+		divErrors.textContent = notificationCheck.errorMsg;
+	}
+
+	initImports();
 }
 
 init();

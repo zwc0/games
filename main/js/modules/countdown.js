@@ -1,8 +1,8 @@
 import '../types/index.js';
 
 const duration = () =>
-	1000 * 60 * 0
-	+ 1000 * 5;
+	1000 * 60 * 3
+	+ 1000 * 0;
 
 function startTimer({divtimer, displayNotification}){
 	const endTime = +new Date() + duration();
@@ -58,8 +58,8 @@ export default (params) => {
 			});
 			abortController = res.abortController;
 		},
-		dispose: () => {
-			//cleanup event listeners	
+	dispose: () => {
+			abortController?.abort();
 		},
 	};
 };
