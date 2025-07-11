@@ -11,7 +11,7 @@ function generateRandomLetter(){
  * @param {ModuleConstructor} params
  * @returns {ModuleReturn}
  */
-export default (params) => {
+export default function (params) {
 	params.container.innerHTML = `<div>
 		Letter:
 		<br />

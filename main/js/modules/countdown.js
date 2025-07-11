@@ -1,11 +1,7 @@
 import '../types/index.js';
 
-const duration = () =>
-	1000 * 60 * 3
-	+ 1000 * 0;
-
-function startTimer({divtimer, displayNotification}){
-	const endTime = +new Date() + duration();
+function startTimer({duration, divtimer, displayNotification}){
+	const endTime = +new Date() + duration;
 	const abortController = new AbortController();
 	abortController.signal.addEventListener('abort', () => {
 		clearInterval(interval);
@@ -37,11 +33,36 @@ function startTimer({divtimer, displayNotification}){
 	return {abortController};
 }
 
+const parseDuration = (duration) => {
+	if (!duration) {
+		return;
+	}
+	try{
+		if (duration.includes(':')) {
+			const [minutes, seconds] = duration.split(':');
+			return 1000 * 60 * minutes + 1000 * seconds;
+		}
+		return (Number(duration) || 0) * 1000 * 60;
+	}catch(e){
+		return;
+	}
+}
+
 /**
  * @param {ModuleConstructor} params
  * @returns {ModuleReturn}
  */
-export default (params) => {
+export default function (params, _duration) {
+	const duration = parseDuration(_duration);
+	if (!duration) {
+		params.container.innerHTML = `<div>
+			Duration param is required. Config example: 
+			<br />
+			{module} 1
+		</div>`;
+		return;
+	}
+
 	params.container.innerHTML = `<div>
 			Time remaining:
 			<br />
@@ -54,7 +75,9 @@ export default (params) => {
 		start: () => {
 			abortController?.abort();
 			const res = startTimer({
-				divtimer: elTimer, displayNotification: params.actions.displayNotification
+				duration,
+				divtimer: elTimer,
+				displayNotification: params.actions.displayNotification
 			});
 			abortController = res.abortController;
 		},

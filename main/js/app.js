@@ -3,6 +3,7 @@ const divErrors = document.getElementById('errors');
 const btnStart = document.getElementById('start');
 const btnStop = document.getElementById('stop');
 const btnConfig = document.getElementById('btnConfig');
+const dialogConfigSave = document.getElementById('dialogConfigSave');
 const textareaModules = document.getElementById('modules');
 const root = document.getElementById('root');
 // #endregion DOM Element Targets
@@ -82,18 +83,17 @@ async function displayNotification(notificationData){
 // #endregion Notifications
 
 const importPresets = {
-	'Scattergories': [
-		'./modules/random-letter.js',
-		'./modules/countdown.js',
-	],
+	'Scattergories': `
+		./modules/random-letter.js
+		./modules/countdown.js 1
+	`,
 };
 
-let imports = importPresets['Scattergories'];
-textareaModules.value = imports.join('\n');
-textareaModules.addEventListener('change', () => {
-	imports = textareaModules.value.split('\n').map(x=>x?.trim?.()).filter(x=>x);
-	initImports();
-});
+const parseImports = (imports) => imports.split('\n').map(x=>x.trim()).filter(x=>x);
+
+const sanitizeImports = (imports) => parseImports(imports).join('\n');
+
+let imports = sanitizeImports(importPresets['Scattergories']);
 
 const initializedModules = new Set();
 
@@ -114,19 +114,30 @@ async function initImports(){
 
 	root.innerHTML = '';
 
-	imports.forEach((src)=>{
+	parseImports(imports).forEach((record)=>{
 		const container = document.createElement('div');
 		root.appendChild(container);
+		const [src, ...params] = record.split(' ');
 		import(src)
 			.then(module => {
-				const m = module.default({container, actions: {
+				const m = new module.default({container, actions: {
 					displayNotification
-				}});
+				}}, ...params);
 				initializedModules.add(m);
 			})
 			.catch(err => console.error('src: ', src, err));
 	});
 }
+
+btnConfig.addEventListener('click', () => {
+	textareaModules.value = imports;
+	document.getElementById('dialogConfig').showModal();
+});
+
+dialogConfigSave.addEventListener('click', () => {
+	imports = sanitizeImports(textareaModules.value);
+	initImports();
+});
 
 async function init(){
 	const notificationCheck = await requestNotificationPermissions();
